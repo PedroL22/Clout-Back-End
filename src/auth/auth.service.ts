@@ -10,7 +10,8 @@ export class AuthService {
     private readonly jwtService: JwtService,
   ) {}
 
-  async signIn(username, password) {
+  async signIn(params: { username: string; password: string }) {
+    const { username, password } = params;
     const user = await this.usersService.findUserByUsername(username);
     if (user?.password !== password) {
       throw new UnauthorizedException();
