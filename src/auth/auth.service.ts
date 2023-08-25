@@ -22,4 +22,23 @@ export class AuthService {
       access_token: await this.jwtService.signAsync(payload),
     };
   }
+
+  async register(params: {
+    username: string;
+    password: string;
+    passwordConfirmation: string;
+  }) {
+    const { username, password, passwordConfirmation } = params;
+
+    if (password !== passwordConfirmation) {
+      throw new UnauthorizedException();
+    }
+
+    const user = await this.usersService.findUser({ username });
+    if (user) {
+      throw new UnauthorizedException();
+    }
+
+    return this.usersService.registerUser({ username, password });
+  }
 }
