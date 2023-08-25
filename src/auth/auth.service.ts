@@ -12,7 +12,7 @@ export class AuthService {
 
   async signIn(params: { username: string; password: string }) {
     const { username, password } = params;
-    const user = await this.usersService.findUserByUsername(username);
+    const user = await this.usersService.findUser({ username });
     if (user?.password !== password) {
       throw new UnauthorizedException();
     }

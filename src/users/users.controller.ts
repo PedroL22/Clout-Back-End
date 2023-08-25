@@ -10,11 +10,10 @@ export class UsersController {
   @Get('users/:identifier')
   async getUser(@Param('identifier') identifier: string): Promise<User> {
     const userId = parseInt(identifier, 10);
-
     if (!isNaN(userId)) {
-      return this.usersService.findUserById(userId);
+      return this.usersService.findUser({ userId });
     } else {
-      return this.usersService.findUserByUsername(identifier);
+      return this.usersService.findUser({ username: identifier });
     }
   }
 
