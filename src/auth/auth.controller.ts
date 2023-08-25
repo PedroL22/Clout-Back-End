@@ -9,7 +9,12 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @Post('login')
   async signInUser(@Body() signInData: { username: string; password: string }) {
-    return this.authService.signIn(signInData);
+    const result = await this.authService.signIn(signInData);
+
+    return {
+      message: 'You have been authenticated successfully.',
+      data: result,
+    };
   }
 
   @Post('register')
@@ -21,6 +26,14 @@ export class AuthController {
       passwordConfirmation: string;
     },
   ) {
-    return this.authService.register(registerData);
+    const registeredUser = await this.authService.register(registerData);
+
+    return {
+      message: 'User created successfully.',
+      data: {
+        userId: registeredUser.userId,
+        username: registeredUser.username,
+      },
+    };
   }
 }
