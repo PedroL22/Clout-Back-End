@@ -1,4 +1,5 @@
-import { Controller, Delete, Get, Param, Post, Put } from '@nestjs/common';
+import { Controller, Delete, Get, Param, Put } from '@nestjs/common';
+import { Body } from '@nestjs/common/decorators/http';
 import { User } from '@prisma/client';
 
 import { UsersService } from './users.service';
@@ -22,14 +23,18 @@ export class UsersController {
     return this.usersService.findAllUsers({});
   }
 
-  @Post('users')
-  async postUser(data: User): Promise<User> {
-    return this.usersService.registerUser(data);
-  }
-
   @Put('users/:userId')
-  async putUser(@Param('userId') userId: number, data: User): Promise<User> {
-    return this.usersService.editUserById({ where: { userId: userId }, data });
+  async putUser(
+    @Param('userId') userId: number,
+    @Body()
+    editData: {
+      username: string;
+    },
+  ): Promise<User> {
+    return this.usersService.editUserById({
+      userId,
+      data: editData,
+    });
   }
 
   @Delete('users/:userId')

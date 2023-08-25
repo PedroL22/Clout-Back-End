@@ -39,13 +39,13 @@ export class UsersService {
   }
 
   async editUserById(params: {
-    where: Prisma.UserWhereUniqueInput;
-    data: Prisma.UserUpdateInput;
+    userId: number;
+    data: { username: string };
   }): Promise<User> {
-    const { where, data } = params;
+    const { userId, data } = params;
     return this.prisma.user.update({
       data,
-      where,
+      where: { userId: Number(userId) },
     });
   }
 
