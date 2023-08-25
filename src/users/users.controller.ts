@@ -7,14 +7,15 @@ import { UsersService } from './users.service';
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
-  @Get('users/:userId')
-  async getUserId(@Param('userId') userId: number): Promise<User> {
-    return this.usersService.findUserById(userId);
-  }
+  @Get('users/:identifier')
+  async getUser(@Param('identifier') identifier: string): Promise<User> {
+    const userId = parseInt(identifier, 10);
 
-  @Get('users/:username')
-  async getUsername(@Param('username') username: string): Promise<User> {
-    return this.usersService.findUserByUsername(username);
+    if (!isNaN(userId)) {
+      return this.usersService.findUserById(userId);
+    } else {
+      return this.usersService.findUserByUsername(identifier);
+    }
   }
 
   @Get('users')
