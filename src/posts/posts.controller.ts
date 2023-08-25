@@ -7,7 +7,10 @@ import {
   Post,
   Put,
 } from '@nestjs/common';
+import { UseGuards } from '@nestjs/common/decorators/core';
 import { Post as PostModel } from '@prisma/client';
+
+import { AuthGuard } from 'src/auth/auth.guard';
 import { PostsService } from './posts.service';
 
 @Controller()
@@ -44,6 +47,7 @@ export class PostsController {
     });
   }
 
+  @UseGuards(AuthGuard)
   @Post('post')
   async createDraft(
     @Body() postData: { title: string; content?: string; username: string },

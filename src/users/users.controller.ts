@@ -8,30 +8,32 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('users/:userId')
-  async getUserById(@Param('userId') userId: number): Promise<User> {
-    return this.usersService.user(userId);
+  async getUserId(@Param('userId') userId: number): Promise<User> {
+    return this.usersService.findUserById(userId);
+  }
+
+  @Get('users/:username')
+  async getUsername(@Param('username') username: string): Promise<User> {
+    return this.usersService.findUserByUsername(username);
   }
 
   @Get('users')
   async getUsers(): Promise<User[]> {
-    return this.usersService.users({});
+    return this.usersService.findAllUsers({});
   }
 
   @Post('users')
-  async registerUser(data: User): Promise<User> {
-    return this.usersService.createUser(data);
+  async postUser(data: User): Promise<User> {
+    return this.usersService.registerUser(data);
   }
 
   @Put('users/:userId')
-  async editUserById(
-    @Param('userId') userId: number,
-    data: User,
-  ): Promise<User> {
-    return this.usersService.updateUser({ where: { userId: userId }, data });
+  async putUser(@Param('userId') userId: number, data: User): Promise<User> {
+    return this.usersService.editUserById({ where: { userId: userId }, data });
   }
 
   @Delete('users/:userId')
-  async deleteUserById(@Param('userId') userId: number): Promise<User> {
-    return this.usersService.deleteUser(userId);
+  async deleteUser(@Param('userId') userId: number): Promise<User> {
+    return this.usersService.deleteUserById(userId);
   }
 }
