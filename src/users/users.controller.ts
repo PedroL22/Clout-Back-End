@@ -53,7 +53,9 @@ export class UsersController {
     editData: {
       username: string;
     },
-  ): Promise<{ data: Partial<User> } | NotFoundException> {
+  ): Promise<
+    { data: Partial<User> } | NotFoundException | UnauthorizedException
+  > {
     const isAdmin = req.user.isAdmin;
     const isOwner = req.user.userId === userId;
 
@@ -83,7 +85,9 @@ export class UsersController {
   async deleteUser(
     @Request() req,
     @Param('userId') userId: string,
-  ): Promise<{ data: Partial<User> } | NotFoundException> {
+  ): Promise<
+    { data: Partial<User> } | NotFoundException | UnauthorizedException
+  > {
     const isAdmin = req.user.isAdmin;
     const isOwner = req.user.userId === userId;
 

@@ -79,7 +79,9 @@ export class PostsController {
       title: string;
       content: string;
     },
-  ): Promise<{ data: Partial<PostModel> } | NotFoundException> {
+  ): Promise<
+    { data: Partial<PostModel> } | NotFoundException | UnauthorizedException
+  > {
     const isAdmin = req.user.isAdmin;
     const isOwner = req.user.userId === editData.authorId;
 
@@ -109,7 +111,9 @@ export class PostsController {
   async deletePost(
     @Request() req,
     @Param('postId') postId: string,
-  ): Promise<{ data: Partial<PostModel> } | NotFoundException> {
+  ): Promise<
+    { data: Partial<PostModel> } | NotFoundException | UnauthorizedException
+  > {
     const selectedPost = await this.postsService.findPost({
       postId: postId,
     });
