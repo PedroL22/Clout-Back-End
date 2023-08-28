@@ -4,6 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
 
 import { UsersService } from '../users/users.service';
 
@@ -24,7 +25,9 @@ export class AuthService {
         throw result;
       }
 
-      if (result.password !== password) {
+      const isPasswordValid = await bcrypt.compare(password, result.password);
+
+      if (!isPasswordValid) {
         throw new UnauthorizedException('Invalid credentials.');
       }
 
@@ -54,7 +57,12 @@ export class AuthService {
       throw new UnauthorizedException('Username already taken.');
     }
 
-    const result = await this.usersService.registerUser({ username, password });
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const result = await this.usersService.registerUser({
+      username,
+      password: hashedPassword,
+    });
     if (!(result instanceof UnauthorizedException)) {
       return { userId: result.userId, username: result.username };
     }

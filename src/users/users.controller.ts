@@ -30,10 +30,12 @@ export class UsersController {
   }
 
   @Get('users')
-  async getUsers(): Promise<{ data: User[] }> {
+  async getUsers(): Promise<{ data: Partial<User>[] }> {
     const users = await this.usersService.findAllUsers({});
 
-    return { data: users };
+    return {
+      data: users,
+    };
   }
 
   @Put('users/:userId')
