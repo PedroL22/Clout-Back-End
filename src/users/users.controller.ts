@@ -1,14 +1,18 @@
 import {
+  Body,
   Controller,
   Delete,
   Get,
   NotFoundException,
   Param,
   Put,
+  Request,
+  UnauthorizedException,
+  UseGuards,
 } from '@nestjs/common';
-import { Body } from '@nestjs/common/decorators/http';
 import { User } from '@prisma/client';
 
+import { AuthGuard } from 'src/auth/auth.guard';
 import { UsersService } from './users.service';
 
 @Controller()
@@ -40,6 +44,7 @@ export class UsersController {
     };
   }
 
+  @UseGuards(AuthGuard)
   @Put('users/:userId')
   async putUser(
     @Param('userId') userId: string,
@@ -61,10 +66,23 @@ export class UsersController {
     };
   }
 
+  @UseGuards(AuthGuard)
   @Delete('users/:userId')
   async deleteUser(
+    @Request() req,
     @Param('userId') userId: string,
   ): Promise<{ data: Partial<User> } | NotFoundException> {
+    const isAdmin = req.user.isAdmin;
+    const isOwner = req.user.userId === userId;
+
+    const canDelete = isAdmin || isOwner;
+
+    if (!canDelete) {
+      throw new UnauthorizedException(
+        'You do not have permission to delete this user.',
+      );
+    }
+
     const result = await this.usersService.deleteUserById(userId);
 
     if (result instanceof NotFoundException) return result;
