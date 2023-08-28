@@ -1,4 +1,5 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import { User } from '@prisma/client';
 
 import { AuthService } from './auth.service';
 
@@ -8,7 +9,12 @@ export class AuthController {
 
   @HttpCode(HttpStatus.OK)
   @Post('login')
-  async signInUser(@Body() signInData: { username: string; password: string }) {
+  async signInUser(
+    @Body() signInData: { username: string; password: string },
+  ): Promise<{
+    message: string;
+    data: Partial<User> & { access_token: string };
+  }> {
     const result = await this.authService.signIn(signInData);
 
     return {
@@ -25,7 +31,10 @@ export class AuthController {
       password: string;
       passwordConfirmation: string;
     },
-  ) {
+  ): Promise<{
+    message: string;
+    data: Partial<User>;
+  }> {
     const result = await this.authService.register(registerData);
 
     return {

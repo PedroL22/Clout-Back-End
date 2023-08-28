@@ -16,7 +16,9 @@ export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('users/:identifier')
-  async getUser(@Param('identifier') identifier: string) {
+  async getUser(
+    @Param('identifier') identifier: string,
+  ): Promise<{ data: Partial<User> } | string | object> {
     const result = await this.usersService.findUser({
       userId: identifier,
       username: identifier,
@@ -45,7 +47,7 @@ export class UsersController {
     editData: {
       username: string;
     },
-  ) {
+  ): Promise<{ data: Partial<User> } | NotFoundException> {
     const result = await this.usersService.editUserById({
       userId,
       data: editData,
@@ -60,7 +62,9 @@ export class UsersController {
   }
 
   @Delete('users/:userId')
-  async deleteUser(@Param('userId') userId: string) {
+  async deleteUser(
+    @Param('userId') userId: string,
+  ): Promise<{ data: Partial<User> } | NotFoundException> {
     const result = await this.usersService.deleteUserById(userId);
 
     if (result instanceof NotFoundException) return result;

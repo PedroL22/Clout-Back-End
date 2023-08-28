@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { Post, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -6,7 +6,7 @@ import { PrismaService } from '../prisma/prisma.service';
 export class PostsService {
   constructor(private prisma: PrismaService) {}
 
-  async post(
+  async findPost(
     postWhereUniqueInput: Prisma.PostWhereUniqueInput,
   ): Promise<Post | null> {
     return this.prisma.post.findUnique({
@@ -14,7 +14,7 @@ export class PostsService {
     });
   }
 
-  async posts(params: {
+  async findAllPosts(params: {
     skip?: number;
     take?: number;
     cursor?: Prisma.PostWhereUniqueInput;
@@ -37,18 +37,25 @@ export class PostsService {
     });
   }
 
-  async updatePost(params: {
-    where: Prisma.PostWhereUniqueInput;
-    data: Prisma.PostUpdateInput;
-  }): Promise<Post> {
-    const { data, where } = params;
-    return this.prisma.post.update({
-      data,
-      where,
-    });
+  async editPostById(params: {
+    postId: string;
+    data: { title: string; content: string };
+  }): Promise<Post | NotFoundException> {
+    const { postId, data } = params;
+
+    try {
+      const result = this.prisma.post.update({
+        data,
+        where: { postId: postId },
+      });
+
+      return result;
+    } catch {
+      throw new NotFoundException('Post not found.');
+    }
   }
 
-  async deletePost(where: Prisma.PostWhereUniqueInput): Promise<Post> {
+  async deletePostById(where: Prisma.PostWhereUniqueInput): Promise<Post> {
     return this.prisma.post.delete({
       where,
     });
