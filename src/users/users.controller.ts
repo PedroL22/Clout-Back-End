@@ -52,24 +52,28 @@ export class UsersController {
       username: string;
     },
   ) {
-    const editedUser = await this.usersService.editUserById({
+    const result = await this.usersService.editUserById({
       userId,
       data: editData,
     });
 
+    if (result instanceof NotFoundException) return result;
+
     return {
       message: 'User edited successfully.',
-      data: { userId: editedUser.userId, username: editedUser.username },
+      data: { userId: result.userId, username: result.username },
     };
   }
 
   @Delete('users/:userId')
   async deleteUser(@Param('userId') userId: number) {
-    const deletedUser = await this.usersService.deleteUserById(userId);
+    const result = await this.usersService.deleteUserById(userId);
+
+    if (result instanceof NotFoundException) return result;
 
     return {
       message: 'User deleted successfully.',
-      data: { userId: deletedUser.userId, username: deletedUser.username },
+      data: { userId: result.userId, username: result.username },
     };
   }
 }

@@ -17,11 +17,9 @@ export class UsersService {
     const result = await this.prisma.user.findUnique({
       where: UserWhereUniqueInput,
     });
-
     if (!result) {
       return new NotFoundException('User not found.');
     }
-
     return result;
   }
 
@@ -53,17 +51,30 @@ export class UsersService {
   async editUserById(params: {
     userId: number;
     data: { username: string };
-  }): Promise<User> {
+  }): Promise<User | NotFoundException> {
     const { userId, data } = params;
-    return this.prisma.user.update({
-      data,
-      where: { userId: Number(userId) },
-    });
+
+    try {
+      const result = await this.prisma.user.update({
+        data,
+        where: { userId: Number(userId) },
+      });
+
+      return result;
+    } catch {
+      throw new NotFoundException('User not found.');
+    }
   }
 
-  async deleteUserById(userId: number): Promise<User> {
-    return this.prisma.user.delete({
-      where: { userId: Number(userId) },
-    });
+  async deleteUserById(userId: number): Promise<User | NotFoundException> {
+    try {
+      const result = await this.prisma.user.delete({
+        where: { userId: Number(userId) },
+      });
+
+      return result;
+    } catch {
+      throw new NotFoundException('User not found.');
+    }
   }
 }
