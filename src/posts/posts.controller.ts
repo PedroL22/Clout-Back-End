@@ -8,6 +8,7 @@ import {
   Post,
   Put,
   Request,
+  UnauthorizedException,
   UseGuards,
 } from '@nestjs/common';
 import { Post as PostModel } from '@prisma/client';
@@ -30,7 +31,7 @@ export class PostsController {
     if (result instanceof NotFoundException) return result.getResponse();
 
     return {
-      data: { postId: result.postId },
+      data: result,
     };
   }
 
@@ -70,13 +71,26 @@ export class PostsController {
   @UseGuards(AuthGuard)
   @Put('posts/:postId')
   async putPost(
+    @Request() req,
     @Param('postId') postId: string,
     @Body()
     editData: {
+      authorId: string;
       title: string;
       content: string;
     },
   ): Promise<{ data: Partial<PostModel> } | NotFoundException> {
+    const isAdmin = req.user.isAdmin;
+    const isOwner = req.user.userId === editData.authorId;
+
+    const hasPermission = isAdmin || isOwner;
+
+    if (!hasPermission) {
+      throw new UnauthorizedException(
+        'You do not have permission to edit this post.',
+      );
+    }
+
     const result = await this.postsService.editPostById({
       postId,
       data: editData,
@@ -93,8 +107,26 @@ export class PostsController {
   @UseGuards(AuthGuard)
   @Delete('posts/:postId')
   async deletePost(
+    @Request() req,
     @Param('postId') postId: string,
   ): Promise<{ data: Partial<PostModel> } | NotFoundException> {
+    const selectedPost = await this.postsService.findPost({
+      postId: postId,
+    });
+
+    if (selectedPost instanceof NotFoundException) return selectedPost;
+
+    const isAdmin = req.user.isAdmin;
+    const isOwner = req.user.userId === selectedPost.authorId;
+
+    const hasPermission = isAdmin || isOwner;
+
+    if (!hasPermission) {
+      throw new UnauthorizedException(
+        'You do not have permission to delete this post.',
+      );
+    }
+
     const result = await this.postsService.deletePostById({ postId: postId });
 
     if (result instanceof NotFoundException) return result;
