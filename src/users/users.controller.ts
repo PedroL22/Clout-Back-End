@@ -12,21 +12,19 @@ export class UsersController {
   async getUser(@Param('identifier') identifier: string) {
     const userId = parseInt(identifier, 10);
     if (!isNaN(userId)) {
-      const user = await this.usersService.findUser({ userId });
+      const result = await this.usersService.findUser({ userId });
 
       return {
         data: {
-          userId: user.userId,
-          username: user.username,
+          result,
         },
       };
     } else {
-      const user = await this.usersService.findUser({ username: identifier });
+      const result = await this.usersService.findUser({ username: identifier });
 
       return {
         data: {
-          userId: user.userId,
-          username: user.username,
+          result,
         },
       };
     }

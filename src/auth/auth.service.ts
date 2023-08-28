@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 
 import { UsersService } from '../users/users.service';
@@ -12,15 +16,26 @@ export class AuthService {
 
   async signIn(params: { username: string; password: string }) {
     const { username, password } = params;
-    const user = await this.usersService.findUser({ username });
-    if (user?.password !== password) {
+
+    try {
+      const result = await this.usersService.findUser({ username });
+
+      if (result instanceof NotFoundException) {
+        throw result;
+      }
+
+      if (result.password !== password) {
+        throw new UnauthorizedException('Invalid credentials.');
+      }
+
+      const payload = { userId: result.userId, username: result.username };
+
+      return {
+        access_token: await this.jwtService.signAsync(payload),
+      };
+    } catch (error) {
       throw new UnauthorizedException('Invalid credentials.');
     }
-
-    const payload = { userId: user.userId, username: user.username };
-    return {
-      access_token: await this.jwtService.signAsync(payload),
-    };
   }
 
   async register(params: {
@@ -35,10 +50,13 @@ export class AuthService {
     }
 
     const user = await this.usersService.findUser({ username });
-    if (user) {
+    if (!(user instanceof NotFoundException)) {
       throw new UnauthorizedException('Username already taken.');
     }
 
-    return this.usersService.registerUser({ username, password });
+    const result = await this.usersService.registerUser({ username, password });
+    if (!(result instanceof UnauthorizedException)) {
+      return { userId: result.userId, username: result.username };
+    }
   }
 }

@@ -26,14 +26,11 @@ export class AuthController {
       passwordConfirmation: string;
     },
   ) {
-    const registeredUser = await this.authService.register(registerData);
+    const result = await this.authService.register(registerData);
 
     return {
       message: 'User created successfully.',
-      data: {
-        userId: registeredUser.userId,
-        username: registeredUser.username,
-      },
+      data: result,
     };
   }
 }
