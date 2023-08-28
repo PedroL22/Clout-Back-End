@@ -21,7 +21,7 @@ export class UsersController {
     if (!isNaN(userId)) {
       const result = await this.usersService.findUser({ userId });
 
-      if (result instanceof NotFoundException) return result;
+      if (result instanceof NotFoundException) return result.getResponse();
 
       return {
         data: { userId: result.userId, username: result.username },
@@ -29,7 +29,7 @@ export class UsersController {
     } else {
       const result = await this.usersService.findUser({ username: identifier });
 
-      if (result instanceof NotFoundException) return result;
+      if (result instanceof NotFoundException) return result.getResponse();
 
       return {
         data: { userId: result.userId, username: result.username },
