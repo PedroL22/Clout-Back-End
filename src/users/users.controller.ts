@@ -1,4 +1,11 @@
-import { Controller, Delete, Get, Param, Put } from '@nestjs/common';
+import {
+  Controller,
+  Delete,
+  Get,
+  NotFoundException,
+  Param,
+  Put,
+} from '@nestjs/common';
 import { Body } from '@nestjs/common/decorators/http';
 import { User } from '@prisma/client';
 
@@ -14,18 +21,18 @@ export class UsersController {
     if (!isNaN(userId)) {
       const result = await this.usersService.findUser({ userId });
 
+      if (result instanceof NotFoundException) return result;
+
       return {
-        data: {
-          result,
-        },
+        data: { userId: result.userId, username: result.username },
       };
     } else {
       const result = await this.usersService.findUser({ username: identifier });
 
+      if (result instanceof NotFoundException) return result;
+
       return {
-        data: {
-          result,
-        },
+        data: { userId: result.userId, username: result.username },
       };
     }
   }
