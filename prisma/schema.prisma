@@ -11,9 +11,10 @@ datasource db {
 }
 
 model User {
-  userId   String @id @default(uuid())
-  username String @unique
+  userId   String  @id @default(uuid())
+  username String  @unique
   password String
+  isAdmin  Boolean @default(false)
   posts    Post[]
 }
 
