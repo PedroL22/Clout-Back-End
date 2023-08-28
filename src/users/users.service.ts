@@ -4,6 +4,7 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { Prisma, User } from '@prisma/client';
+import { validate as validateUUID } from 'uuid';
 
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -12,14 +13,31 @@ export class UsersService {
   constructor(private readonly prisma: PrismaService) {}
 
   async findUser(
-    UserWhereUniqueInput: Prisma.UserWhereUniqueInput,
+    userWhereUniqueInput: Prisma.UserWhereUniqueInput,
   ): Promise<User | NotFoundException> {
+    if (validateUUID(userWhereUniqueInput.userId)) {
+      const result = await this.prisma.user.findUnique({
+        where: {
+          userId: userWhereUniqueInput.userId,
+        },
+      });
+
+      if (!result) {
+        return new NotFoundException('User not found.');
+      }
+
+      return result;
+    }
     const result = await this.prisma.user.findUnique({
-      where: UserWhereUniqueInput,
+      where: {
+        username: userWhereUniqueInput.username,
+      },
     });
+
     if (!result) {
       return new NotFoundException('User not found.');
     }
+
     return result;
   }
 
@@ -49,7 +67,7 @@ export class UsersService {
   }
 
   async editUserById(params: {
-    userId: number;
+    userId: string;
     data: { username: string };
   }): Promise<User | NotFoundException> {
     const { userId, data } = params;
@@ -57,7 +75,7 @@ export class UsersService {
     try {
       const result = await this.prisma.user.update({
         data,
-        where: { userId: Number(userId) },
+        where: { userId: userId },
       });
 
       return result;
@@ -66,10 +84,10 @@ export class UsersService {
     }
   }
 
-  async deleteUserById(userId: number): Promise<User | NotFoundException> {
+  async deleteUserById(userId: string): Promise<User | NotFoundException> {
     try {
       const result = await this.prisma.user.delete({
-        where: { userId: Number(userId) },
+        where: { userId: userId },
       });
 
       return result;

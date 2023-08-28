@@ -17,24 +17,16 @@ export class UsersController {
 
   @Get('users/:identifier')
   async getUser(@Param('identifier') identifier: string) {
-    const userId = parseInt(identifier, 10);
-    if (!isNaN(userId)) {
-      const result = await this.usersService.findUser({ userId });
+    const result = await this.usersService.findUser({
+      userId: identifier,
+      username: identifier,
+    });
 
-      if (result instanceof NotFoundException) return result.getResponse();
+    if (result instanceof NotFoundException) return result.getResponse();
 
-      return {
-        data: { userId: result.userId, username: result.username },
-      };
-    } else {
-      const result = await this.usersService.findUser({ username: identifier });
-
-      if (result instanceof NotFoundException) return result.getResponse();
-
-      return {
-        data: { userId: result.userId, username: result.username },
-      };
-    }
+    return {
+      data: { userId: result.userId, username: result.username },
+    };
   }
 
   @Get('users')
@@ -46,7 +38,7 @@ export class UsersController {
 
   @Put('users/:userId')
   async putUser(
-    @Param('userId') userId: number,
+    @Param('userId') userId: string,
     @Body()
     editData: {
       username: string;
@@ -66,7 +58,7 @@ export class UsersController {
   }
 
   @Delete('users/:userId')
-  async deleteUser(@Param('userId') userId: number) {
+  async deleteUser(@Param('userId') userId: string) {
     const result = await this.usersService.deleteUserById(userId);
 
     if (result instanceof NotFoundException) return result;

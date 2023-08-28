@@ -19,7 +19,7 @@ export class PostsController {
 
   @Get('post/:postId')
   async getPostById(@Param('postId') postId: string): Promise<PostModel> {
-    return this.postsService.post({ postId: Number(postId) });
+    return this.postsService.post({ postId: postId });
   }
 
   @Get('feed')
@@ -65,13 +65,13 @@ export class PostsController {
   @Put('publish/:postId')
   async publishPost(@Param('postId') postId: string): Promise<PostModel> {
     return this.postsService.updatePost({
-      where: { postId: Number(postId) },
+      where: { postId: postId },
       data: { published: true },
     });
   }
 
   @Delete('post/:postId')
   async deletePost(@Param('postId') postId: string): Promise<PostModel> {
-    return this.postsService.deletePost({ postId: Number(postId) });
+    return this.postsService.deletePost({ postId: postId });
   }
 }
