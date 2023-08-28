@@ -19,12 +19,12 @@ import { PostsService } from './posts.service';
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
-  @Get('posts/:identifier')
+  @Get('posts/:postId')
   async getPost(
-    @Param('identifier') identifier: string,
+    @Param('postId') postId: string,
   ): Promise<{ data: Partial<PostModel> } | string | object> {
     const result = await this.postsService.findPost({
-      postId: identifier,
+      postId: postId,
     });
 
     if (result instanceof NotFoundException) return result.getResponse();
