@@ -7,6 +7,7 @@ import {
   Param,
   Post,
   Put,
+  Request,
   UseGuards,
 } from '@nestjs/common';
 import { Post as PostModel } from '@prisma/client';
@@ -19,24 +20,41 @@ export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Get('posts/:postId')
-  async getPostById(@Param('postId') postId: string): Promise<PostModel> {
+  async getPost(@Param('postId') postId: string): Promise<PostModel> {
     return this.postsService.findPost({ postId: postId });
   }
 
   @Get('posts')
-  async getPosts(): Promise<PostModel[]> {
-    return this.postsService.findAllPosts({});
+  async getPosts(): Promise<{ data: Partial<PostModel>[] }> {
+    const posts = await this.postsService.findAllPosts({});
+
+    return {
+      data: posts,
+    };
   }
 
   @UseGuards(AuthGuard)
   @Post('posts')
-  async postPost(@Body() data: PostModel): Promise<PostModel> {
-    return this.postsService.createPost({
-      ...data,
+  async postPost(
+    @Request() req,
+    @Body() createData: { title: string; content: string },
+  ): Promise<{
+    message: string;
+    data: Partial<PostModel>;
+  }> {
+    const userId = req.user.userId;
+
+    const result = await this.postsService.createPost({
+      ...createData,
       author: {
-        connect: { userId: data.authorId },
+        connect: { userId: userId },
       },
     });
+
+    return {
+      message: 'Post created successfully.',
+      data: result,
+    };
   }
 
   @UseGuards(AuthGuard)
@@ -48,7 +66,7 @@ export class PostsController {
       title: string;
       content: string;
     },
-  ) {
+  ): Promise<{ data: Partial<PostModel> } | NotFoundException> {
     const result = await this.postsService.editPostById({
       postId,
       data: editData,
@@ -58,13 +76,22 @@ export class PostsController {
 
     return {
       message: 'Post edited successfully.',
-      data: { result },
+      data: result,
     };
   }
 
   @UseGuards(AuthGuard)
   @Delete('posts/:postId')
-  async deletePost(@Param('postId') postId: string): Promise<PostModel> {
-    return this.postsService.deletePostById({ postId: postId });
+  async deletePost(
+    @Param('postId') postId: string,
+  ): Promise<{ data: Partial<PostModel> } | NotFoundException> {
+    const result = await this.postsService.deletePostById({ postId: postId });
+
+    if (result instanceof NotFoundException) return result;
+
+    return {
+      message: 'Post deleted successfully.',
+      data: { postId: result.postId, title: result.title },
+    };
   }
 }
