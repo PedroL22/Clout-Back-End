@@ -47,12 +47,24 @@ export class UsersController {
   @UseGuards(AuthGuard)
   @Put('users/:userId')
   async putUser(
+    @Request() req,
     @Param('userId') userId: string,
     @Body()
     editData: {
       username: string;
     },
   ): Promise<{ data: Partial<User> } | NotFoundException> {
+    const isAdmin = req.user.isAdmin;
+    const isOwner = req.user.userId === userId;
+
+    const hasPermission = isAdmin || isOwner;
+
+    if (!hasPermission) {
+      throw new UnauthorizedException(
+        'You do not have permission to edit this user.',
+      );
+    }
+
     const result = await this.usersService.editUserById({
       userId,
       data: editData,
@@ -75,9 +87,9 @@ export class UsersController {
     const isAdmin = req.user.isAdmin;
     const isOwner = req.user.userId === userId;
 
-    const canDelete = isAdmin || isOwner;
+    const hasPermission = isAdmin || isOwner;
 
-    if (!canDelete) {
+    if (!hasPermission) {
       throw new UnauthorizedException(
         'You do not have permission to delete this user.',
       );
