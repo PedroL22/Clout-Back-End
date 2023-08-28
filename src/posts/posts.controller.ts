@@ -19,9 +19,19 @@ import { PostsService } from './posts.service';
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
-  @Get('posts/:postId')
-  async getPost(@Param('postId') postId: string): Promise<PostModel> {
-    return this.postsService.findPost({ postId: postId });
+  @Get('posts/:identifier')
+  async getPost(
+    @Param('identifier') identifier: string,
+  ): Promise<{ data: Partial<PostModel> } | string | object> {
+    const result = await this.postsService.findPost({
+      postId: identifier,
+    });
+
+    if (result instanceof NotFoundException) return result.getResponse();
+
+    return {
+      data: { postId: result.postId },
+    };
   }
 
   @Get('posts')

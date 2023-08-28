@@ -1,5 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { Post, Prisma } from '@prisma/client';
+
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -8,10 +9,18 @@ export class PostsService {
 
   async findPost(
     postWhereUniqueInput: Prisma.PostWhereUniqueInput,
-  ): Promise<Post | null> {
-    return this.prisma.post.findUnique({
-      where: postWhereUniqueInput,
+  ): Promise<Post | NotFoundException> {
+    const result = await this.prisma.post.findUnique({
+      where: {
+        postId: postWhereUniqueInput.postId,
+      },
     });
+
+    if (!result) {
+      return new NotFoundException('Post not found.');
+    }
+
+    return result;
   }
 
   async findAllPosts(params: {
