@@ -1,72 +1,70 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { Post, Prisma } from '@prisma/client';
+import { Injectable, NotFoundException } from '@nestjs/common'
+import { Post, Prisma } from '@prisma/client'
 
-import { PrismaService } from 'src/modules/prisma/services/prisma.service';
+import { PrismaService } from 'src/modules/prisma/services/prisma.service'
 
 @Injectable()
 export class PostsService {
   constructor(private prisma: PrismaService) {}
 
-  async findPost(
-    postWhereUniqueInput: Prisma.PostWhereUniqueInput,
-  ): Promise<Post | NotFoundException> {
+  async findPost(postWhereUniqueInput: Prisma.PostWhereUniqueInput): Promise<Post | NotFoundException> {
     const result = await this.prisma.post.findUnique({
       where: {
         postId: postWhereUniqueInput.postId,
       },
-    });
+    })
 
     if (!result) {
-      return new NotFoundException('Post not found.');
+      return new NotFoundException('Post not found.')
     }
 
-    return result;
+    return result
   }
 
   async findAllPosts(params: {
-    skip?: number;
-    take?: number;
-    cursor?: Prisma.PostWhereUniqueInput;
-    where?: Prisma.PostWhereInput;
-    orderBy?: Prisma.PostOrderByWithRelationInput;
+    skip?: number
+    take?: number
+    cursor?: Prisma.PostWhereUniqueInput
+    where?: Prisma.PostWhereInput
+    orderBy?: Prisma.PostOrderByWithRelationInput
   }): Promise<Post[]> {
-    const { skip, take, cursor, where, orderBy } = params;
+    const { skip, take, cursor, where, orderBy } = params
     return this.prisma.post.findMany({
       skip,
       take,
       cursor,
       where,
       orderBy,
-    });
+    })
   }
 
   async createPost(data: Prisma.PostCreateInput): Promise<Post> {
     return this.prisma.post.create({
       data,
-    });
+    })
   }
 
   async editPostById(params: {
-    postId: string;
-    data: { title: string; content: string };
+    postId: string
+    data: { title: string; content: string }
   }): Promise<Post | NotFoundException> {
-    const { postId, data } = params;
+    const { postId, data } = params
 
     try {
       const result = this.prisma.post.update({
         data,
         where: { postId: postId },
-      });
+      })
 
-      return result;
+      return result
     } catch {
-      throw new NotFoundException('Post not found.');
+      throw new NotFoundException('Post not found.')
     }
   }
 
   async deletePostById(where: Prisma.PostWhereUniqueInput): Promise<Post> {
     return this.prisma.post.delete({
       where,
-    });
+    })
   }
 }

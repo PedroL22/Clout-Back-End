@@ -10,62 +10,60 @@ import {
   Request,
   UnauthorizedException,
   UseGuards,
-} from '@nestjs/common';
-import { Post as PostModel } from '@prisma/client';
+} from '@nestjs/common'
+import { Post as PostModel } from '@prisma/client'
 
-import { AuthGuard } from 'src/common/auth.guard';
-import { PostsService } from '../services/posts.service';
+import { AuthGuard } from 'src/common/auth.guard'
+import { PostsService } from '../services/posts.service'
 
 @Controller()
 export class PostsController {
   constructor(private readonly postsService: PostsService) {}
 
   @Get('posts/:postId')
-  async getPost(
-    @Param('postId') postId: string,
-  ): Promise<{ data: Partial<PostModel> } | string | object> {
+  async getPost(@Param('postId') postId: string): Promise<{ data: Partial<PostModel> } | string | object> {
     const result = await this.postsService.findPost({
       postId: postId,
-    });
+    })
 
-    if (result instanceof NotFoundException) return result.getResponse();
+    if (result instanceof NotFoundException) return result.getResponse()
 
     return {
       data: result,
-    };
+    }
   }
 
   @Get('posts')
   async getPosts(): Promise<{ data: Partial<PostModel>[] }> {
-    const posts = await this.postsService.findAllPosts({});
+    const posts = await this.postsService.findAllPosts({})
 
     return {
       data: posts,
-    };
+    }
   }
 
   @UseGuards(AuthGuard)
   @Post('posts')
   async postPost(
     @Request() req,
-    @Body() createData: { title: string; content: string },
+    @Body() createData: { title: string; content: string }
   ): Promise<{
-    message: string;
-    data: Partial<PostModel>;
+    message: string
+    data: Partial<PostModel>
   }> {
-    const userId = req.user.userId;
+    const userId = req.user.userId
 
     const result = await this.postsService.createPost({
       ...createData,
       author: {
         connect: { userId: userId },
       },
-    });
+    })
 
     return {
       message: 'Post created successfully.',
       data: result,
-    };
+    }
   }
 
   @UseGuards(AuthGuard)
@@ -75,69 +73,61 @@ export class PostsController {
     @Param('postId') postId: string,
     @Body()
     editData: {
-      authorId: string;
-      title: string;
-      content: string;
-    },
-  ): Promise<
-    { data: Partial<PostModel> } | NotFoundException | UnauthorizedException
-  > {
-    const isAdmin = req.user.isAdmin;
-    const isOwner = req.user.userId === editData.authorId;
+      authorId: string
+      title: string
+      content: string
+    }
+  ): Promise<{ data: Partial<PostModel> } | NotFoundException | UnauthorizedException> {
+    const isAdmin = req.user.isAdmin
+    const isOwner = req.user.userId === editData.authorId
 
-    const hasPermission = isAdmin || isOwner;
+    const hasPermission = isAdmin || isOwner
 
     if (!hasPermission) {
-      throw new UnauthorizedException(
-        'You do not have permission to edit this post.',
-      );
+      throw new UnauthorizedException('You do not have permission to edit this post.')
     }
 
     const result = await this.postsService.editPostById({
       postId,
       data: editData,
-    });
+    })
 
-    if (result instanceof NotFoundException) return result;
+    if (result instanceof NotFoundException) return result
 
     return {
       message: 'Post edited successfully.',
       data: result,
-    };
+    }
   }
 
   @UseGuards(AuthGuard)
   @Delete('posts/:postId')
   async deletePost(
     @Request() req,
-    @Param('postId') postId: string,
-  ): Promise<
-    { data: Partial<PostModel> } | NotFoundException | UnauthorizedException
-  > {
+    @Param('postId') postId: string
+  ): Promise<{ data: Partial<PostModel> } | NotFoundException | UnauthorizedException> {
     const selectedPost = await this.postsService.findPost({
       postId: postId,
-    });
+    })
 
-    if (selectedPost instanceof NotFoundException) return selectedPost;
+    if (selectedPost instanceof NotFoundException) return selectedPost
 
-    const isAdmin = req.user.isAdmin;
-    const isOwner = req.user.userId === selectedPost.authorId;
+    const isAdmin = req.user.isAdmin
+    const isOwner = req.user.userId === selectedPost.authorId
 
-    const hasPermission = isAdmin || isOwner;
+    const hasPermission = isAdmin || isOwner
 
     if (!hasPermission) {
-      throw new UnauthorizedException(
-        'You do not have permission to delete this post.',
-      );
+      throw new UnauthorizedException('You do not have permission to delete this post.')
     }
 
-    const result = await this.postsService.deletePostById({ postId: postId });
+    const result = await this.postsService.deletePostById({ postId: postId })
 
-    if (result instanceof NotFoundException) return result;
+    if (result instanceof NotFoundException) return result
 
     return {
       message: 'Post deleted successfully.',
       data: { postId: result.postId, title: result.title },
-    };
+    }
   }
 }

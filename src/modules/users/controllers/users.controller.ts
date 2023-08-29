@@ -9,39 +9,37 @@ import {
   Request,
   UnauthorizedException,
   UseGuards,
-} from '@nestjs/common';
-import { User } from '@prisma/client';
+} from '@nestjs/common'
+import { User } from '@prisma/client'
 
-import { AuthGuard } from 'src/common/auth.guard';
-import { UsersService } from '../services/users.service';
+import { AuthGuard } from 'src/common/auth.guard'
+import { UsersService } from '../services/users.service'
 
 @Controller()
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 
   @Get('users/:identifier')
-  async getUser(
-    @Param('identifier') identifier: string,
-  ): Promise<{ data: Partial<User> } | string | object> {
+  async getUser(@Param('identifier') identifier: string): Promise<{ data: Partial<User> } | string | object> {
     const result = await this.usersService.findUser({
       userId: identifier,
       username: identifier,
-    });
+    })
 
-    if (result instanceof NotFoundException) return result.getResponse();
+    if (result instanceof NotFoundException) return result.getResponse()
 
     return {
       data: { userId: result.userId, username: result.username },
-    };
+    }
   }
 
   @Get('users')
   async getUsers(): Promise<{ data: Partial<User>[] }> {
-    const users = await this.usersService.findAllUsers({});
+    const users = await this.usersService.findAllUsers({})
 
     return {
       data: users,
-    };
+    }
   }
 
   @UseGuards(AuthGuard)
@@ -51,61 +49,53 @@ export class UsersController {
     @Param('userId') userId: string,
     @Body()
     editData: {
-      username: string;
-    },
-  ): Promise<
-    { data: Partial<User> } | NotFoundException | UnauthorizedException
-  > {
-    const isAdmin = req.user.isAdmin;
-    const isOwner = req.user.userId === userId;
+      username: string
+    }
+  ): Promise<{ data: Partial<User> } | NotFoundException | UnauthorizedException> {
+    const isAdmin = req.user.isAdmin
+    const isOwner = req.user.userId === userId
 
-    const hasPermission = isAdmin || isOwner;
+    const hasPermission = isAdmin || isOwner
 
     if (!hasPermission) {
-      throw new UnauthorizedException(
-        'You do not have permission to edit this user.',
-      );
+      throw new UnauthorizedException('You do not have permission to edit this user.')
     }
 
     const result = await this.usersService.editUserById({
       userId,
       data: editData,
-    });
+    })
 
-    if (result instanceof NotFoundException) return result;
+    if (result instanceof NotFoundException) return result
 
     return {
       message: 'User edited successfully.',
       data: { userId: result.userId, username: result.username },
-    };
+    }
   }
 
   @UseGuards(AuthGuard)
   @Delete('users/:userId')
   async deleteUser(
     @Request() req,
-    @Param('userId') userId: string,
-  ): Promise<
-    { data: Partial<User> } | NotFoundException | UnauthorizedException
-  > {
-    const isAdmin = req.user.isAdmin;
-    const isOwner = req.user.userId === userId;
+    @Param('userId') userId: string
+  ): Promise<{ data: Partial<User> } | NotFoundException | UnauthorizedException> {
+    const isAdmin = req.user.isAdmin
+    const isOwner = req.user.userId === userId
 
-    const hasPermission = isAdmin || isOwner;
+    const hasPermission = isAdmin || isOwner
 
     if (!hasPermission) {
-      throw new UnauthorizedException(
-        'You do not have permission to delete this user.',
-      );
+      throw new UnauthorizedException('You do not have permission to delete this user.')
     }
 
-    const result = await this.usersService.deleteUserById(userId);
+    const result = await this.usersService.deleteUserById(userId)
 
-    if (result instanceof NotFoundException) return result;
+    if (result instanceof NotFoundException) return result
 
     return {
       message: 'User deleted successfully.',
       data: { userId: result.userId, username: result.username },
-    };
+    }
   }
 }
