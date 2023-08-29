@@ -12,8 +12,8 @@ import {
 } from '@nestjs/common';
 import { User } from '@prisma/client';
 
-import { AuthGuard } from 'src/auth/auth.guard';
-import { UsersService } from './users.service';
+import { AuthGuard } from 'src/common/auth.guard';
+import { UsersService } from '../services/users.service';
 
 @Controller()
 export class UsersController {

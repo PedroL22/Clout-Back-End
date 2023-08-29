@@ -1,7 +1,7 @@
 import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
 import { User } from '@prisma/client';
 
-import { AuthService } from './auth.service';
+import { AuthService } from '../services/auth.service';
 
 @Controller('auth')
 export class AuthController {

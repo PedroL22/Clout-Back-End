@@ -6,7 +6,7 @@ import {
 import { Prisma, User } from '@prisma/client';
 import { validate as validateUUID } from 'uuid';
 
-import { PrismaService } from '../prisma/prisma.service';
+import { PrismaService } from 'src/modules/prisma/services/prisma.service';
 
 @Injectable()
 export class UsersService {

@@ -13,8 +13,8 @@ import {
 } from '@nestjs/common';
 import { Post as PostModel } from '@prisma/client';
 
-import { AuthGuard } from 'src/auth/auth.guard';
-import { PostsService } from './posts.service';
+import { AuthGuard } from 'src/common/auth.guard';
+import { PostsService } from '../services/posts.service';
 
 @Controller()
 export class PostsController {

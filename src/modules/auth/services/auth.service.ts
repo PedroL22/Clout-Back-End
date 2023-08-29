@@ -6,7 +6,7 @@ import {
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
-import { UsersService } from '../users/users.service';
+import { UsersService } from 'src/modules/users/services/users.service';
 
 @Injectable()
 export class AuthService {
@@ -28,7 +28,7 @@ export class AuthService {
       const isPasswordValid = await bcrypt.compare(password, result.password);
 
       if (!isPasswordValid) {
-        throw new UnauthorizedException('Invalid credentials.');
+        throw new UnauthorizedException('Invalid credentials password.');
       }
 
       const payload = {
