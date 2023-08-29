@@ -2,9 +2,9 @@
   "name": "clout-back-end",
   "version": "0.0.1",
   "description": "",
-  "author": "",
+  "author": "Pedro Lucena <pedrocontact22@gmail.com>",
   "private": true,
-  "license": "UNLICENSED",
+  "license": "MIT",
   "prisma": {
     "schema": "src/database/schema.prisma"
   },
